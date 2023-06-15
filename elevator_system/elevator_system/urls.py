@@ -17,7 +17,8 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import include, path
 from rest_framework import routers
-from elevator.views import ElevatorViewSet, RequestViewSet
+from elevator.views import ElevatorViewSet, RequestViewSet 
+from elevator.views import submit_request, initialize_elevator_system, mark_elevator_not_operational,fetch_requests_for_elevator, get_next_destination,get_elevator_status,operate_elevator_door
 
 router = routers.DefaultRouter()
 router.register('elevators', ElevatorViewSet)
@@ -26,4 +27,11 @@ router.register('requests', RequestViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/initialize-elevator-system/', initialize_elevator_system, name='initialize_elevator_system'),
+    path('api/mark-elevator-not-operational/', mark_elevator_not_operational, name='mark_elevator_not_operational'),
+    path('api/fetch-requests-for-elevator/<elevator_number>/', fetch_requests_for_elevator, name='fetch_requests_for_elevator'),
+    path('api/submit-request/', submit_request, name='submit-request'),
+    path('api/operate_elevator_door/', operate_elevator_door, name='operate_elevator_door'),
+    path('api/next-destination/<int:elevator_number>/', get_next_destination, name='get_next_destination'),
+    path('api/status/<int:elevator_number>/', get_elevator_status, name='get_elevator_status'),
 ]

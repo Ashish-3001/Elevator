@@ -1,40 +1,100 @@
 from django.db import models
-
+import time
 # Create your models here.
 class Elevator(models.Model):
+    elevator_number = models.IntegerField()
     floor = models.IntegerField(default=0)
     is_running = models.BooleanField(default=False)
     is_door_open = models.BooleanField(default=False)
     is_available = models.BooleanField(default=True)
     is_operational = models.BooleanField(default=True)
+    status = models.CharField(
+        max_length=10,
+        choices=(
+            ('UP', 'Up'),
+            ('DOWN', 'Down'),
+            ('IDLE', 'Idle')
+        ),
+        default='IDLE'
+    )
 
-    def move_up(self):
+    def handle_requests(self):
+        print("got it")
+        requests = Request.objects.filter(elevator=self)
+        print(requests)
+
+        for request in requests:
+            destination_floor = request.floor
+            print(destination_floor)
+            if destination_floor > self.floor:
+                self.move_up(destination_floor)
+            elif destination_floor < self.floor:
+                self.move_down(destination_floor)
+
+            # After reaching the destination floor, remove the request
+            print("hello")
+            request.delete()
+
+        # Mark the elevator as available once all requests are processed
+        self.is_available = True
+        self.save()
+
+    def move_up(self,destination):
         # Logic to move the elevator up
-        pass
+        self.is_available = False
+        self.status = 'UP'
+        self.save()
 
-    def move_down(self):
-        # Logic to move the elevator down
-        pass
+        current_floor = self.floor
+        while current_floor < destination:
+            time.sleep(5)  # Simulate elevator movement time
+            
+            current_floor += 1
+            self.floor = current_floor
+            self.save()
+        
+        self.open_door()
+
+        self.status = 'IDLE'
+        self.is_available = True
+        self.save()
+        
+        
+
+    def move_down(self,destination):
+        print("dowm")
+        self.is_available = False
+        self.status = 'DOWN'
+        self.save()
+
+        current_floor = self.floor
+        while current_floor > destination:
+            time.sleep(5)  # Simulate elevator movement time
+            
+            current_floor -= 1
+            self.floor = current_floor
+            self.save()
+        
+        self.open_door()
+
+        self.status = 'IDLE'
+        self.is_available = True
+        self.save()
 
     def open_door(self):
-        # Logic to open the elevator door
-        pass
+        self.is_door_open = True
+        self.save()
+
+        # Wait for 5 seconds
+        time.sleep(5)
+
+        self.close_door()
 
     def close_door(self):
-        # Logic to close the elevator door
-        pass
+        self.is_door_open = False
+        self.save()
 
-    def start_running(self):
-        # Logic to start the elevator running
-        pass
 
-    def stop_running(self):
-        # Logic to stop the elevator running
-        pass
-
-    def display_status(self):
-        # Logic to display the current elevator status
-        pass
 
 class Request(models.Model):
     elevator = models.ForeignKey(Elevator, on_delete=models.CASCADE)
