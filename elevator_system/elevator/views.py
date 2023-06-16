@@ -4,6 +4,7 @@ from .serializers import ElevatorSerializer, RequestSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .tasks import process_elevators
+from django.shortcuts import render, redirect
 
 class ElevatorViewSet(viewsets.ModelViewSet):
     queryset = Elevator.objects.all()
@@ -14,6 +15,28 @@ class RequestViewSet(viewsets.ModelViewSet):
     serializer_class = RequestSerializer
 
 process_elevators()
+
+@api_view(['GET', 'POST'])
+def home(request):
+    if request.method == 'POST':
+        num_elevators = int(request.data.get('num_elevators'))
+        initialize_elevator_system(request._request)
+        return redirect('elevator_page')
+    return render(request, 'elevator/home.html')
+
+@api_view(['GET', 'POST'])
+def elevator_page(request):
+    if request.method == 'POST':
+        floor = int(request.data.get('floor'))
+        submit_request(request._request)
+        
+        return redirect('elevator_page')
+
+    # Fetch the elevator details for the table
+    elevators = Elevator.objects.all()
+    serializer = ElevatorSerializer(elevators, many=True)
+
+    return render(request, 'elevator/elevator_page.html', {'elevators': serializer.data})
 
 @api_view(['POST'])
 def initialize_elevator_system(request):
@@ -113,12 +136,19 @@ def operate_elevator_door(request):
     except Elevator.DoesNotExist:
         return Response({'message': f'Elevator with number {elevator_number} does not exist'}, status=404)
 
+
     if action == 'open':
-        elevator.open_door()
-        return Response({'message': f'Door of elevator {elevator_number} opened'}, status=200)
+        if elevator.is_available:
+            elevator.open_door()
+            return Response({'message': f'Door of elevator {elevator_number} opened'}, status=200)
+        else:
+            return Response({'message': f'Door of elevator {elevator_number} busy'}, status=200)
     elif action == 'close':
-        elevator.close_door()
-        return Response({'message': f'Door of elevator {elevator_number} closed'}, status=200)
+        if elevator.is_door_opens:
+            elevator.close_door()
+            return Response({'message': f'Door of elevator {elevator_number} closed'}, status=200)
+        else:
+            return Response({'message': f'Door of elevator {elevator_number} closed'}, status=200)
     else:
         return Response({'message': 'Invalid action'}, status=400)
 

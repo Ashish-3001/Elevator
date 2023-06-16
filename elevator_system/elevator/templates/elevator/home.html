@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <style>
+        body {
+            height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        label {
+            margin-bottom: 10px;
+        }
+
+        input[type="number"] {
+            padding: 5px;
+            width: 200px;
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Initialize Elevator System</h1>
+    <br>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="num_elevators">Number of Elevators:</label>
+        <input type="number" name="num_elevators" id="num_elevators" required>
+        <input type="submit" value="Initialize">
+    </form>
+</body>
+</html>

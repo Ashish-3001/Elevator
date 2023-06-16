@@ -5,7 +5,7 @@ class Elevator(models.Model):
     elevator_number = models.IntegerField()
     floor = models.IntegerField(default=0)
     is_running = models.BooleanField(default=False)
-    is_door_open = models.BooleanField(default=False)
+    is_door_opens = models.BooleanField(default=False)
     is_available = models.BooleanField(default=True)
     is_operational = models.BooleanField(default=True)
     status = models.CharField(
@@ -42,6 +42,7 @@ class Elevator(models.Model):
     def move_up(self,destination):
         # Logic to move the elevator up
         self.is_available = False
+        self.is_door_opens = False
         self.status = 'UP'
         self.save()
 
@@ -54,6 +55,9 @@ class Elevator(models.Model):
             self.save()
         
         self.open_door()
+        # Wait for 2 seconds
+        time.sleep(2)
+        self.close_door()
 
         self.status = 'IDLE'
         self.is_available = True
@@ -64,6 +68,7 @@ class Elevator(models.Model):
     def move_down(self,destination):
         print("dowm")
         self.is_available = False
+        self.is_door_opens = False
         self.status = 'DOWN'
         self.save()
 
@@ -76,22 +81,22 @@ class Elevator(models.Model):
             self.save()
         
         self.open_door()
-
+        # Wait for 2 seconds
+        time.sleep(2)
+        self.close_door()
         self.status = 'IDLE'
         self.is_available = True
         self.save()
 
     def open_door(self):
-        self.is_door_open = True
+        print("hey")
+        self.is_door_opens = True
         self.save()
+        print("saved")
 
-        # Wait for 5 seconds
-        time.sleep(5)
-
-        self.close_door()
 
     def close_door(self):
-        self.is_door_open = False
+        self.is_door_opens = False
         self.save()
 
 

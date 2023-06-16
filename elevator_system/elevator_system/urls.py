@@ -18,13 +18,15 @@ from django.urls import path
 from django.urls import include, path
 from rest_framework import routers
 from elevator.views import ElevatorViewSet, RequestViewSet 
-from elevator.views import submit_request, initialize_elevator_system, mark_elevator_not_operational,fetch_requests_for_elevator, get_next_destination,get_elevator_status,operate_elevator_door
+from elevator.views import submit_request, initialize_elevator_system, mark_elevator_not_operational,fetch_requests_for_elevator, get_next_destination,get_elevator_status,operate_elevator_door, home, elevator_page
 
 router = routers.DefaultRouter()
 router.register('elevators', ElevatorViewSet)
 router.register('requests', RequestViewSet)
 
 urlpatterns = [
+    path('', home, name='home'),
+    path('elevator-page/', elevator_page, name='elevator_page'),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api/initialize-elevator-system/', initialize_elevator_system, name='initialize_elevator_system'),
